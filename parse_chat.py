@@ -98,6 +98,9 @@ def parse_chat_html(filepath):
         return
 
     df = pd.DataFrame(all_messages)
+
+    # Normalize timestamps to pandas datetime so they persist correctly in parquet
+    df["create_time"] = pd.to_datetime(df["create_time"], unit="s", errors="coerce")
     
     print(f"Saving to {OUTPUT_FILE}...")
     df.to_parquet(OUTPUT_FILE, engine='pyarrow', index=False)
