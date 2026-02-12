@@ -1,0 +1,315 @@
+{
+  "schema_version": 1,
+  "constructs": [
+    "goal_setting",
+    "goal_navigation",
+    "problem_decomposition",
+    "strategic_planning",
+    "progress_monitoring",
+    "obstacle_management",
+    "help_seeking_resourcefulness",
+    "self_efficacy_or_confidence",
+    "resilience_or_persistence"
+  ],
+  "examples": [
+    {
+      "text": "I want to stop the function and print an error message if nrow(Data_selected) == 0, else proceed with the lines after the following chunk: # import data dat &lt;- raw_dat %&gt;% janitor::clean_names() # clean var names in R # clean enroll date dat_s &lt;- dat %&gt;% #mutate([REDACTED_ID] = format(anydate(date_completed), &quot;%Y-%m-%d&quot;)) mutate([REDACTED_ID] = mdy_hms(date_completed)) # Filter model completion = success &amp;",
+      "extractions": [
+        {
+          "extraction_class": "goal_setting",
+          "extraction_text": "I want to stop the function and print an error message if nrow(Data_selected) == 0, else proceed with the lines after the followi",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "obstacle_management",
+          "extraction_text": "error message if nrow(Data_selected) == 0, else proceed with the lines after the following chunk: # import data dat &lt;- raw",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "223f5700-bf90-4409-a189-5c91c930318d",
+        "conversation_title": "Stop if No Rows",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "what is bert relationship to hiererchical clustering? are these two separate methods? --- is bert just an embedding model then? --- for things like bertopic, bert is really just step 1 right --- is hdbscan relevant to the thing described below?: - Process: 1. Use embeddings to develop conversation/message vectors 2. Using some distance measure to perform hierarchical clustering 3. Allows you to cut clusters at various levels of k (number of clusters) 4. Explorable set of clusters at different levels of granularity - Something DG wants, but a gateway to labeling use case for evaluation (creating metrics).",
+      "extractions": [
+        {
+          "extraction_class": "goal_navigation",
+          "extraction_text": "then",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "progress_monitoring",
+          "extraction_text": "measure to perform hierarchical clustering 3",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "68f7d6cb-e660-8324-823d-6916d3ea0b7a",
+        "conversation_title": "BERT and clustering comparison",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "based on the activities that I give you, could you imagine that I am a teacher learning to implement focus binoculars and I spy for my students in primary school, and I am using an AI app to help me learn and do the activities. Could you be this AI assistant and guide me through the activities step by step?: Note: Click here to download and print a card version of this practice that can be added to the other Brain Games practices to make an easy-to-use hand-held collection. See the SEL Kernels pack for additional activities. The Big Idea • Playing Brain Games helps us to build our “brain powers,” or executive function (EF) skills.",
+      "extractions": [
+        {
+          "extraction_class": "problem_decomposition",
+          "extraction_text": "step by step",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "help_seeking_resourcefulness",
+          "extraction_text": "help me learn and do the activities",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "80b6a674-4f54-4150-8218-98cd8ae71848",
+        "conversation_title": "Interactive Brain Game",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "what are sub constructs of human affective state and emotion? --- what is the psych literature behind this categorization --- could you revise the example to reflect users&#x27; emotional experiecnes when interacting with a chatbot: Many affective states can be relevant in evaluating users’ emotional experiences with a chatbot, such as valence (e.g., joy vs. sadness), arousal (excitement vs. calmness), and dominance (anger vs. fear) --- revise grammar: There are a few caveats to the above approach.",
+      "extractions": [
+        {
+          "extraction_class": "strategic_planning",
+          "extraction_text": "approach",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "67f59996-d670-8005-8ea0-d2634d8406b5",
+        "conversation_title": "Sub-constructs of Emotion",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "Is this mentioned in the paper? --- Many businesses had difficulty rebounding, even after the initial lockdown period had ended (Li et al., 2022). --- is this information mentioned? Systemic social and economic inequities, such as racism, lack of healthcare access, pre-existing co-morbidities, lack of in-language resources, wealth disparities, lack of financial support, housing insecurity, food insecurity, inequitable access to education, lack of internet connectivity, and a lack of social support put some New Yorkers at greater risk for loss of employment, essential worker status, or greater vulnerability to COVID due to an inability to work from home --- does the paper mention any of this",
+      "extractions": [
+        {
+          "extraction_class": "progress_monitoring",
+          "extraction_text": "status, or greater vulnerability to COVID due to an inability to work from home --- does the paper mention any of this",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "obstacle_management",
+          "extraction_text": "difficulty rebounding, even after the initial lockdown period had ended (Li et al",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "help_seeking_resourcefulness",
+          "extraction_text": "resources, wealth disparities, lack of financial support, housing insecurity, food insecurity, inequitable access to education, l",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "2fcfdc3f-3fb7-4301-a7f7-00a6e3c31079",
+        "conversation_title": "Businesses Struggle Post-Lockdown",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "I have an ris file that has multiple entries like the one below, I wish to read it into R data frames. Could you help me write a function? --- yes please. this is the error message that I got following your code: ris_data &lt;- read_ris(file.path(path, &quot;cashplus_references.ris&quot;)) Error in rbind(deparse.level, ...) : numbers of columns of arguments do not match --- ris_data &lt;- read_ris(file.path(path, &quot;cashplus_references.ris&quot;)) Error in set() : could not find function &quot;set&quot;",
+      "extractions": [
+        {
+          "extraction_class": "obstacle_management",
+          "extraction_text": "error message that I got following your code: ris_data &lt;- read_ris(file",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "help_seeking_resourcefulness",
+          "extraction_text": "help me write a function",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "08287ada-a3dc-41f3-8855-6866fd69cbfc",
+        "conversation_title": "Clean & Organize RIS Data",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "rewrite the findings: good feedbacks on introducing different resources and tools, such as the GIS, maps and vulnerability data, and people highly praised the used of case examples. however, two people mentioned their concern about how to use the tools and the current condition that not every emergency angency has a GIS analyst. How to deal with the issue Some participants provided very detailed information about the potential suggestions (refer to page xxx). For instance, they want a before/after comparason map for the disasters, and they provide resources of more robust community data than census tracts and zip code areas.",
+      "extractions": [
+        {
+          "extraction_class": "obstacle_management",
+          "extraction_text": "issue Some participants provided very detailed information about the potential suggestions (refer to page xxx)",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "help_seeking_resourcefulness",
+          "extraction_text": "resources and tools, such as the GIS, maps and vulnerability data, and people highly praised the used of case examples",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "fc902101-bed0-420c-911d-c33307cf6032",
+        "conversation_title": "Feedback Improvement Suggestions: Emergency Course",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "rewrite: Hi Josh, I am working on the progress report. Is this the table I need to update on? Are these numbers already in the table the right numbers that I need to double-check or they are just the place holders? If it is the latter, could you give me the time range of those courses and the correct course code that I need to work on? Thank you! --- rewrite: Are those two courses that I need to focus on or there are more courses? --- rewrite: Hi Hannah and Hope, Hope you are doing well! I wanted to share some findings from the data team’s recent analysis of the pilot course PER 409.",
+      "extractions": [
+        {
+          "extraction_class": "goal_setting",
+          "extraction_text": "I need to update on",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "progress_monitoring",
+          "extraction_text": "progress report",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "a93a9375-8a54-40ba-8a21-dc34a97fd14d",
+        "conversation_title": "Table Update Confirmation Needed",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "I want to draw a stacked bar plot with two datasets ([REDACTED_ID] and [REDACTED_ID]). The x axis will be the score, the y axis will be the number of people. both datasets has a column called score_percentage shows the score. I want to have the number of [REDACTED_ID] below the number of [REDACTED_ID]. Can you show me the python code? --- this is good, can you make the figure size (10,5), hide the grid in between, hide the top and right spines --- can you make the bar thicker? --- bar_Width is not working --- it is not working --- this is my current code, can you add number at the right side of the bar?",
+      "extractions": [
+        {
+          "extraction_class": "goal_setting",
+          "extraction_text": "I want to draw a stacked bar plot with two datasets ([REDACTED_ID] and [REDACTED_ID])",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "help_seeking_resourcefulness",
+          "extraction_text": "Can you show me the python code",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "202dd17c-3c8a-4dd2-85fd-2e1a99e0e4d8",
+        "conversation_title": "Stacked Bar Plot Python.",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "&quot;Next, I&#x27;m not sure why duration of the intervention was used as a covariate. This is an endogenous variable that occurs after random assignment and is clearly caused by differences in students&#x27; responses to the treatment. This is not a valid covariate and is endogenous to treatment; it should clearly not be included as a covariate.&quot; Is there any situation where including the duration of an intervention in an RCT to esstimate treatment effect on outcoems is valid? --- do you know if it tends to overestimate or underestimate the treatment impact? --- If I show that the treatment status is uncorrelated with the duration, does it alleviate teh concern?",
+      "extractions": [
+        {
+          "extraction_class": "goal_navigation",
+          "extraction_text": "Next, I&#x27;m not sure why duration of the intervention was used as a covariate",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "progress_monitoring",
+          "extraction_text": "status is uncorrelated with the duration, does it alleviate teh concern",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "6778454e-9bec-8005-a2e0-134f5256903d",
+        "conversation_title": "Duration as Covariate in RCT",
+        "is_candidate": false
+      }
+    },
+    {
+      "text": "I am going to give you a few papers. The first one is Wu et al. 2021, attached in this message. In the next few messages, I will provide other papers citing Wu et al. 2021, and I need to know answers to the following questions: Citing Article’s Objectives: (Please describe in 3-4 sentences what the objective or goals of the citing authors were for their research and how it relates to your work generally.) Citing Article’s Importance to the Field: (Please describe in 2-3 sentences why the citing article is important – for instance, how such research fits into the larger discussion or goals in your field.) How and Why Your Work Was Used: (Please describe in 4-5 sentences how and why the author",
+      "extractions": [
+        {
+          "extraction_class": "goal_setting",
+          "extraction_text": "I need to know answers to the following questions: Citing Article’s Objectives: (Please describe in 3-4 sentences what the object",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        },
+        {
+          "extraction_class": "goal_navigation",
+          "extraction_text": "first one is Wu et al",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "5bd9a781-ed5f-4322-af22-08e9134a9b3c",
+        "conversation_title": "Citing Article Analysis",
+        "is_candidate": false
+      }
+    },
+    {
+      "text": "based on what&#x27;s written in phase 3, I want to create a hypothetical case study of chatsel in an interactive tool on a website. I also want to situation the measurement of agency in this attached paper and the framework it proposes. Could you draft ideas for the case study and ideas for the interactive tool, given your understanding of ChatSEL from my past conversation with you and also the info I attach here?: Level 3 – User evaluation: Does the product positively support users’ thoughts, feelings, and actions? Why is this level of evaluation important?",
+      "extractions": [
+        {
+          "extraction_class": "goal_setting",
+          "extraction_text": "I want to create a hypothetical case study of chatsel in an interactive tool on a website",
+          "attributes": {
+            "seed_source": "heuristic_example_bootstrap"
+          }
+        }
+      ],
+      "metadata": {
+        "conversation_id": "689217bc-2bf0-8324-bd92-5d8b9a8d8ffd",
+        "conversation_title": "Case study ideas ChatSEL",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "make this table shorter: | **Evaluation Level** | **Primary Roles** | **Key Responsibilities and Focus** | | -------------------------------- | -------------------------------------------------------- | -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "extractions": [],
+      "metadata": {
+        "conversation_id": "687fb16b-244c-8005-85c6-d94d11e2c85e",
+        "conversation_title": "Shorten table content",
+        "is_candidate": true
+      }
+    },
+    {
+      "text": "I was a student has dual degree in architecture and urban planning. I am applying for an online cs master&#x27;s degree. This is my skillset table in my previous cv. How to make it more suitable for the application? ● Modeling: Rhino, AutoCAD, SketchUp, CDR, Revit, 3ds Max ● Rendering: V-Ray, Enscape ● Graphic Design: Photoshop, Illustrator, InDesign, Processing (Python) ● Mapping: ArcGIS, QGIS ● Data Management: R, Jupyter Notebook (Python), SPSS, Excel ● Web Programming: HTML ● Hardware Programming: Arduino (C++) ● Productivity: Microsoft Office ● Language: Mandarin (Native), English (Fluent), Shanghainese (Native), Cantonese (Basic Communication) --- how to write this part?",
+      "extractions": [],
+      "metadata": {
+        "conversation_id": "6b5d436e-8f8b-4dab-b631-166f80a3277d",
+        "conversation_title": "CS Master's Skillset Adjustment",
+        "is_candidate": true
+      }
+    }
+  ]
+}

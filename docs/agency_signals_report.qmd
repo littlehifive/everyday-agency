@@ -1,0 +1,222 @@
+---
+title: "Everyday Agency Signals In Human-AI Conversations"
+format: html
+jupyter: python3
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## Data and preprocessing
+
+This report summarizes conversation-level agency coding from user-authored messages in `data/chat_messages.parquet`.
+
+Pipeline steps:
+
+1. Keep `author_role == "user"` with non-empty text.
+2. Aggregate to one row per `conversation_id`.
+3. Apply two-stage candidate filtering (`title_score`, `text_cue_score`).
+4. Run LangExtract coding for agency constructs.
+5. Build binary + count features per construct.
+
+```{python}
+from pathlib import Path
+import re
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.set_theme(style="whitegrid")
+
+cwd = Path.cwd()
+docs_dir = cwd if cwd.name == "docs" else (cwd / "docs")
+root = docs_dir.parent
+data_dir = root / "data" / "derived" / "agency"
+fig_dir = data_dir / "figures"
+fig_dir.mkdir(parents=True, exist_ok=True)
+
+features_path = data_dir / "conversation_agency_features.parquet"
+prevalence_path = data_dir / "construct_prevalence.parquet"
+snippets_path = data_dir / "example_snippets_redacted.csv"
+
+if not features_path.exists():
+    raise FileNotFoundError(f"Missing features file: {features_path}")
+if not prevalence_path.exists():
+    raise FileNotFoundError(f"Missing prevalence file: {prevalence_path}")
+
+features = pd.read_parquet(features_path)
+prevalence = pd.read_parquet(prevalence_path)
+snippets = pd.read_csv(snippets_path) if snippets_path.exists() else pd.DataFrame()
+
+features["is_candidate"] = features["is_candidate"].astype(bool)
+features["first_user_time"] = pd.to_datetime(features["first_user_time"], errors="coerce")
+features["agency_density"] = features["agency_total_count"] / features["n_user_messages"].clip(lower=1)
+
+flag_cols = [c for c in features.columns if c.endswith("_flag") and c != "agency_total_flags"]
+count_cols = [c for c in features.columns if c.endswith("_count") and c != "agency_total_count"]
+
+summary = {
+    "n_conversations": int(features["conversation_id"].nunique()),
+    "candidate_share": float(features["is_candidate"].mean()),
+    "mean_agency_total_count": float(features["agency_total_count"].mean()),
+    "median_agency_total_count": float(features["agency_total_count"].median()),
+}
+summary
+```
+
+## Candidate filtering diagnostics
+
+```{python}
+filter_diag = (
+    features[["is_candidate", "title_score", "text_cue_score", "n_user_chars"]]
+    .groupby("is_candidate")
+    .agg(["count", "mean", "median"])
+)
+filter_diag
+```
+
+## LangExtract coding setup
+
+Constructs coded:
+
+```{python}
+[c.replace("_", " ") for c in prevalence["construct"].tolist()]
+```
+
+Few-shot examples were created from a small sample of real user conversation snippets with redaction applied to emails, URLs, phones, and long IDs.
+
+## Main results
+
+### Construct prevalence
+
+```{python}
+plot_df = prevalence.sort_values("prevalence_rate", ascending=False).copy()
+plot_df["label"] = plot_df["construct"].str.replace("_", " ")
+
+fig, ax = plt.subplots(figsize=(11, 6))
+sns.barplot(data=plot_df, x="prevalence_rate", y="label", color="#2f6c8f", ax=ax)
+ax.set_xlabel("Share of conversations flagged")
+ax.set_ylabel("Agency construct")
+ax.set_title("Prevalence of agency constructs")
+plt.tight_layout()
+fig.savefig(fig_dir / "construct_prevalence_bar.png", dpi=180)
+plt.show()
+```
+
+### Distribution of agency counts per conversation
+
+```{python}
+fig, ax = plt.subplots(figsize=(10, 5))
+sns.histplot(features["agency_total_count"], bins=30, color="#c47f2c", ax=ax)
+ax.set_xlabel("Total extracted agency signals per conversation")
+ax.set_ylabel("Number of conversations")
+ax.set_title("Distribution of agency_total_count")
+plt.tight_layout()
+fig.savefig(fig_dir / "agency_total_count_distribution.png", dpi=180)
+plt.show()
+```
+
+### Construct co-occurrence heatmap
+
+```{python}
+cooc = features[flag_cols].astype(int).T.dot(features[flag_cols].astype(int))
+labels = [c.replace("_flag", "").replace("_", " ") for c in flag_cols]
+cooc.index = labels
+cooc.columns = labels
+
+fig, ax = plt.subplots(figsize=(10, 8))
+sns.heatmap(cooc, cmap="Blues", linewidths=0.3, ax=ax)
+ax.set_title("Construct co-occurrence across conversations")
+plt.tight_layout()
+fig.savefig(fig_dir / "construct_cooccurrence_heatmap.png", dpi=180)
+plt.show()
+```
+
+### Time trend: monthly average agency counts
+
+```{python}
+trend = (
+    features.dropna(subset=["first_user_time"])
+    .assign(month=lambda d: d["first_user_time"].dt.to_period("M").dt.to_timestamp())
+    .groupby("month", as_index=False)["agency_total_count"]
+    .mean()
+    .sort_values("month")
+)
+
+fig, ax = plt.subplots(figsize=(11, 5))
+sns.lineplot(data=trend, x="month", y="agency_total_count", marker="o", color="#1f7a4f", ax=ax)
+ax.set_xlabel("Month")
+ax.set_ylabel("Average agency_total_count")
+ax.set_title("Monthly trend in agency signal intensity")
+plt.tight_layout()
+fig.savefig(fig_dir / "monthly_agency_trend.png", dpi=180)
+plt.show()
+```
+
+### Top conversation topics by agency density
+
+```{python}
+stopwords = {
+    "the", "and", "for", "with", "from", "about", "chat", "new", "request", "help",
+    "fix", "review", "summary", "analysis", "update", "message", "code"
+}
+
+def topic_token(title: str) -> str:
+    tokens = re.findall(r"[a-zA-Z][a-zA-Z0-9'-]+", str(title).lower())
+    for token in tokens:
+        if token not in stopwords and len(token) >= 3:
+            return token
+    return "other"
+
+topic_df = features.copy()
+topic_df["topic_keyword"] = topic_df["conversation_title"].map(topic_token)
+topic_stats = (
+    topic_df.groupby("topic_keyword", as_index=False)
+    .agg(
+        conversations=("conversation_id", "count"),
+        mean_agency_density=("agency_density", "mean"),
+    )
+    .query("conversations >= 10")
+    .sort_values("mean_agency_density", ascending=False)
+    .head(12)
+)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(data=topic_stats, x="mean_agency_density", y="topic_keyword", color="#7a4aa6", ax=ax)
+ax.set_xlabel("Mean agency density (agency_total_count / n_user_messages)")
+ax.set_ylabel("Topic keyword")
+ax.set_title("Top topic keywords by agency density")
+plt.tight_layout()
+fig.savefig(fig_dir / "top_topics_by_agency_density.png", dpi=180)
+plt.show()
+```
+
+## Redacted evidence examples
+
+```{python}
+if snippets.empty:
+    display_df = pd.DataFrame({"note": ["No snippet file found at expected path."]})
+else:
+    display_df = (
+        snippets.sort_values(
+            ["is_candidate", "n_heuristic_extractions", "snippet_char_len"],
+            ascending=[False, False, False],
+        )
+        .head(12)
+        .copy()
+    )
+    display_df["snippet_redacted"] = display_df["snippet_redacted"].str.slice(0, 220) + "..."
+    display_df = display_df[
+        ["conversation_title", "is_candidate", "heuristic_constructs", "snippet_redacted"]
+    ]
+display_df
+```
+
+## Limitations
+
+- This analysis codes only user-authored messages and ignores assistant/tool text.
+- Candidate filtering is heuristic and may exclude some subtle agency expressions.
+- Few-shot labels are bootstrapped with weak heuristics and should be iteratively refined.
+- Binary and count features are useful for trend analysis but do not capture full nuance of agency expression.
