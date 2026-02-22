@@ -15,22 +15,22 @@ def parse_args() -> argparse.Namespace:
     )
     add_common_args(
         parser,
-        default_input="data/derived/agency/langextract_extractions_long.parquet",
-        default_output="data/derived/agency/conversation_agency_features.parquet",
+        default_input="data/derived/langextract/langextract_extractions_long.parquet",
+        default_output="data/derived/langextract/conversation_agency_features.parquet",
     )
     parser.add_argument(
         "--metadata",
-        default="data/derived/agency/conversations_candidates.parquet",
+        default="data/derived/langextract/conversations_candidates.parquet",
         help="Candidate metadata parquet path.",
     )
     parser.add_argument(
         "--output-csv",
-        default="data/derived/agency/conversation_agency_features.csv",
+        default="data/derived/langextract/conversation_agency_features.csv",
         help="Output CSV path for conversation-level features.",
     )
     parser.add_argument(
         "--output-prevalence",
-        default="data/derived/agency/construct_prevalence.parquet",
+        default="data/derived/langextract/construct_prevalence.parquet",
         help="Output parquet path for construct prevalence summary.",
     )
     return parser.parse_args()

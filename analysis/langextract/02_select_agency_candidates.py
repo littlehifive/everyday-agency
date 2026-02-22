@@ -24,8 +24,8 @@ def parse_args() -> argparse.Namespace:
     )
     add_common_args(
         parser,
-        default_input="data/derived/agency/conversations_user.parquet",
-        default_output="data/derived/agency/conversations_candidates.parquet",
+        default_input="data/derived/langextract/conversations_user.parquet",
+        default_output="data/derived/langextract/conversations_candidates.parquet",
     )
     return parser.parse_args()
 

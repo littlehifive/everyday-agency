@@ -33,7 +33,7 @@ sns.set_theme(style="whitegrid")
 cwd = Path.cwd()
 docs_dir = cwd if cwd.name == "docs" else (cwd / "docs")
 root = docs_dir.parent
-data_dir = root / "data" / "derived" / "agency"
+data_dir = root / "data" / "derived" / "langextract"
 fig_dir = data_dir / "figures"
 fig_dir.mkdir(parents=True, exist_ok=True)
 

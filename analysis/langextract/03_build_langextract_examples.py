@@ -31,17 +31,17 @@ def parse_args() -> argparse.Namespace:
     )
     add_common_args(
         parser,
-        default_input="data/derived/agency/conversations_candidates.parquet",
-        default_output="data/derived/agency/example_snippets_redacted.csv",
+        default_input="data/derived/langextract/conversations_candidates.parquet",
+        default_output="data/derived/langextract/example_snippets_redacted.csv",
     )
     parser.add_argument(
         "--prompt-output",
-        default="analysis/config/agency_prompt.md",
+        default="analysis/langextract/config/agency_prompt.md",
         help="Path to write prompt instructions.",
     )
     parser.add_argument(
         "--examples-output",
-        default="analysis/config/agency_examples.json",
+        default="analysis/langextract/config/agency_examples.json",
         help="Path to write LangExtract few-shot examples.",
     )
     return parser.parse_args()

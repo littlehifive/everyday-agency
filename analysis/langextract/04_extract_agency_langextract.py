@@ -28,22 +28,22 @@ def parse_args() -> argparse.Namespace:
     )
     add_common_args(
         parser,
-        default_input="data/derived/agency/conversations_candidates.parquet",
-        default_output="data/derived/agency/langextract_extractions_long.parquet",
+        default_input="data/derived/langextract/conversations_candidates.parquet",
+        default_output="data/derived/langextract/langextract_extractions_long.parquet",
     )
     parser.add_argument(
         "--prompt-file",
-        default="analysis/config/agency_prompt.md",
+        default="analysis/langextract/config/agency_prompt.md",
         help="Prompt description markdown path.",
     )
     parser.add_argument(
         "--examples-file",
-        default="analysis/config/agency_examples.json",
+        default="analysis/langextract/config/agency_examples.json",
         help="Few-shot example JSON path.",
     )
     parser.add_argument(
         "--output-jsonl",
-        default="data/derived/agency/langextract_annotations.jsonl",
+        default="data/derived/langextract/langextract_annotations.jsonl",
         help="Path for raw LangExtract annotations JSONL.",
     )
     parser.add_argument(
