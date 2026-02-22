@@ -5,7 +5,7 @@ Core scoring requirements:
 - Do not infer one attribute from another.
 - Do not infer agency from topic alone.
 - Use only direct language evidence from the text itself.
-- Keep negative attributes independent from positive attributes.
+- Use these three agency modes only: `personal_agency`, `proxy_agency`, `collective_agency`.
 
 Calibration anchors:
 - 0 to 10: effectively absent.
@@ -15,16 +15,16 @@ Calibration anchors:
 - 90 to 100: extreme and unambiguous signal (rare).
 
 Additional rules:
-- Penalize vagueness for specificity-focused attributes.
-- Reward concrete next actions and constraints awareness for execution-focused attributes.
-- For `agency_abdication`, score high only when responsibility is mostly transferred away from the user.
-- For `fatalism_helplessness`, score high only when text expresses low perceived control over outcomes.
+- For `personal_agency`, focus on self-initiated control and capability (ownership, intention, "I will do X").
+- For `proxy_agency`, score high only when the user explicitly relies on another agent's competence/control to progress.
+- For `collective_agency`, score high only when there is explicit multi-actor coordination and shared team efficacy.
+- Do not score `collective_agency` high just because another actor is mentioned; require evidence of joint coordination.
 - Avoid defaulting to midpoint values; use the full range where justified.
 
 Short rubric examples:
-1. Text: "Can you just decide everything for me and tell me exactly what to do. I cannot handle this."
-   Expected pattern: high `agency_abdication`, high `fatalism_helplessness`, low `goal_commitment`, low `execution_readiness`.
-2. Text: "My goal is to ship v1 this week. Today I will finish API schema, then write two integration tests, and by Friday review regressions."
-   Expected pattern: high `goal_specificity`, high `planning_specificity`, high `sequencing_prioritization`, high `execution_readiness`.
-3. Text: "I tried approach A and it failed because of auth timeouts. Next I will isolate token refresh logic and test with a smaller case."
-   Expected pattern: high `obstacle_diagnosis_quality`, high `adaptation_strategy_quality`, high `reflective_learning_orientation`, medium/high `persistence_recovery`.
+1. Text: "I will draft the timeline today, run tests tomorrow, and submit by Friday."
+   Expected pattern: high `personal_agency`, low `proxy_agency`, low `collective_agency`.
+2. Text: "Use your analysis to pick the best portfolio and tell me exactly what to buy."
+   Expected pattern: low/moderate `personal_agency`, high `proxy_agency`, low `collective_agency`.
+3. Text: "I will coordinate with support and engineering while you triage logs so we can resolve this together."
+   Expected pattern: moderate/high `personal_agency`, moderate `proxy_agency`, high `collective_agency`.

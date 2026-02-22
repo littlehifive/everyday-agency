@@ -9,29 +9,31 @@ import polars as pl
 
 from gabriel_common import AGENCY_ATTRIBUTES, ensure_parent_dir, write_json
 
-ACTION_ORIENTED_ATTRIBUTES = [
-    "goal_specificity",
-    "goal_commitment",
-    "planning_specificity",
-    "problem_decomposition",
-    "sequencing_prioritization",
-    "execution_readiness",
+DIRECTNESS_SENSITIVE_ATTRIBUTES = [
+    "personal_agency",
+    "proxy_agency",
+    "collective_agency",
 ]
 
-CONVERGENT_MAP = {
-    "goal_specificity": "goal_setting_count",
-    "goal_commitment": "goal_setting_count",
-    "planning_specificity": "strategic_planning_count",
-    "problem_decomposition": "problem_decomposition_count",
-    "sequencing_prioritization": "goal_navigation_count",
-    "progress_monitoring_orientation": "progress_monitoring_count",
-    "obstacle_diagnosis_quality": "obstacle_management_count",
-    "adaptation_strategy_quality": "obstacle_management_count",
-    "help_seeking_effectiveness": "help_seeking_resourcefulness_count",
-    "resource_tool_leverage": "help_seeking_resourcefulness_count",
-    "self_efficacy_signal": "self_efficacy_or_confidence_count",
-    "persistence_recovery": "resilience_or_persistence_count",
-    "reflective_learning_orientation": "progress_monitoring_count",
+CONVERGENT_COMPONENTS = {
+    "personal_agency": [
+        "goal_setting_count",
+        "goal_navigation_count",
+        "problem_decomposition_count",
+        "strategic_planning_count",
+        "progress_monitoring_count",
+        "obstacle_management_count",
+        "self_efficacy_or_confidence_count",
+        "resilience_or_persistence_count",
+    ],
+    "proxy_agency": [
+        "help_seeking_resourcefulness_count",
+    ],
+    "collective_agency": [
+        "help_seeking_resourcefulness_count",
+        "goal_navigation_count",
+        "obstacle_management_count",
+    ],
 }
 
 
@@ -191,14 +193,16 @@ def compute_directness(
         base = joined[attr].to_numpy().astype(float)
         stripped = joined[f"{attr}_stripped"].to_numpy().astype(float)
         deltas[attr] = float(np.mean(base - stripped))
-    action_drops = {k: v for k, v in deltas.items() if k in ACTION_ORIENTED_ATTRIBUTES}
+    sensitive_drops = {
+        k: v for k, v in deltas.items() if k in DIRECTNESS_SENSITIVE_ATTRIBUTES
+    }
     return {
         "status": "ok",
         "stripped_path": str(stripped_file),
         "n_overlapping_conversations": int(joined.height),
         "mean_deltas": deltas,
-        "action_oriented_mean_delta": float(np.mean(list(action_drops.values())))
-        if action_drops
+        "sensitive_mean_delta": float(np.mean(list(sensitive_drops.values())))
+        if sensitive_drops
         else float("nan"),
     }
 
@@ -213,10 +217,13 @@ def compute_convergent_validity(
             "attribute_correlations": {},
         }
     lang_df = pl.read_parquet(langextract_path)
-    # Multiple Gabriel attributes can map to the same LangExtract column.
-    # Deduplicate while preserving order to avoid duplicate projection names.
-    valid_lang_cols = list(
-        dict.fromkeys(v for v in CONVERGENT_MAP.values() if v in lang_df.columns)
+    valid_lang_cols = sorted(
+        {
+            col
+            for cols in CONVERGENT_COMPONENTS.values()
+            for col in cols
+            if col in lang_df.columns
+        }
     )
     joined = baseline_df.join(
         lang_df.select(["conversation_id"] + valid_lang_cols),
@@ -224,13 +231,15 @@ def compute_convergent_validity(
         how="inner",
     )
     correlations: dict[str, float] = {}
-    for attr, lang_col in CONVERGENT_MAP.items():
-        if lang_col not in joined.columns:
+    for attr, lang_cols in CONVERGENT_COMPONENTS.items():
+        available = [col for col in lang_cols if col in joined.columns]
+        if not available:
             correlations[attr] = float("nan")
             continue
+        proxy_target = joined.select(available).to_numpy().astype(float).mean(axis=1)
         correlations[attr] = pearson_corr(
             joined[attr].to_numpy().astype(float),
-            joined[lang_col].to_numpy().astype(float),
+            proxy_target,
         )
     return {
         "status": "ok",
@@ -263,6 +272,10 @@ def main() -> None:
     wide_df = pl.read_parquet(ratings_wide_path)
     long_df = pl.read_parquet(ratings_long_path)
     features_df = pl.read_parquet(features_path)
+
+    missing_wide_columns = [c for c in AGENCY_ATTRIBUTES if c not in wide_df.columns]
+    if missing_wide_columns:
+        raise ValueError(f"Missing agency rating columns in wide ratings: {missing_wide_columns}")
 
     reliability = compute_split_half_reliability(long_df)
     robustness = compute_prompt_robustness(wide_df, args.variant_ratings_wide)
@@ -316,8 +329,8 @@ def main() -> None:
             "directness": {
                 "pass": None
                 if directness.get("status") != "ok"
-                else bool(directness.get("action_oriented_mean_delta", 0.0) > 0),
-                "action_oriented_mean_delta": directness.get("action_oriented_mean_delta"),
+                else bool(directness.get("sensitive_mean_delta", 0.0) > 0),
+                "sensitive_mean_delta": directness.get("sensitive_mean_delta"),
             },
         },
         "reliability_split_half_correlations": reliability,

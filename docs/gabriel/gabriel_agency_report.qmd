@@ -1,0 +1,352 @@
+---
+title: "Gabriel Agency Measurement Report"
+format: html
+jupyter: python3
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## 1) Agency Definitions And Score Calculation
+
+This report uses three conversation-level agency dimensions (each on a 0-100 scale):
+
+- `personal_agency`: how much the user expresses their own capability, ownership, and control over action.
+- `proxy_agency`: how much the user relies on an external agent (for example, an AI assistant) for guidance, decisions, or delegated execution.
+- `collective_agency`: how much the user frames progress as coordinated team effort across multiple actors.
+
+How scores are calculated in this pipeline:
+
+- Step 03 rates each conversation chunk on all three dimensions.
+- Chunk scores are averaged to produce one conversation-level score per dimension.
+- `average_agency_score` in this report is the arithmetic mean of personal, proxy, and collective agency.
+- `proxy_minus_personal` is `proxy_agency - personal_agency`.
+
+```{python}
+from pathlib import Path
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.set_theme(style="whitegrid")
+
+
+def find_repo_root(start: Path) -> Path:
+    for candidate in [start, *start.parents]:
+        if (candidate / "data" / "derived").exists():
+            return candidate
+    raise RuntimeError("Could not locate repository root containing data/derived")
+
+
+root = find_repo_root(Path.cwd().resolve())
+gab_dir = root / "data" / "derived" / "gabriel"
+fig_dir = gab_dir / "figures"
+fig_dir.mkdir(parents=True, exist_ok=True)
+
+features_path = gab_dir / "conversation_agency_features.parquet"
+candidates_path = gab_dir / "conversations_candidates.parquet"
+snippets_path = root / "data" / "derived" / "langextract" / "example_snippets_redacted.csv"
+
+if not features_path.exists():
+    raise FileNotFoundError(f"Missing required file: {features_path}")
+if not candidates_path.exists():
+    raise FileNotFoundError(f"Missing required file: {candidates_path}")
+
+features = pd.read_parquet(features_path)
+candidates = pd.read_parquet(candidates_path)
+snippets = pd.read_csv(snippets_path) if snippets_path.exists() else pd.DataFrame()
+
+agency_attributes = ["personal_agency", "proxy_agency", "collective_agency"]
+for col in agency_attributes:
+    if col not in features.columns:
+        raise ValueError(f"Expected agency column not found: {col}")
+
+content_cols = [c for c in ["conversation_id", "conversation_title", "user_text_concat"] if c in candidates.columns]
+if "conversation_id" not in content_cols:
+    raise ValueError("`conversation_id` missing in candidate metadata.")
+
+report_df = features.merge(
+    candidates[content_cols],
+    on="conversation_id",
+    how="left",
+    suffixes=("", "_meta"),
+)
+
+if "agency_index_raw" in report_df.columns:
+    report_df["average_agency_score"] = report_df["agency_index_raw"]
+else:
+    report_df["average_agency_score"] = report_df[agency_attributes].mean(axis=1)
+
+if "proxy_minus_personal" not in report_df.columns:
+    report_df["proxy_minus_personal"] = report_df["proxy_agency"] - report_df["personal_agency"]
+
+if "content" not in report_df.columns:
+    if "user_text_concat" in report_df.columns:
+        report_df["content"] = report_df["user_text_concat"]
+    else:
+        report_df["content"] = ""
+report_df["content"] = report_df["content"].fillna("").astype(str)
+
+if "conversation_title" not in report_df.columns and "conversation_title_meta" in report_df.columns:
+    report_df["conversation_title"] = report_df["conversation_title_meta"]
+
+palette = {
+    "personal_agency": "#2a9d8f",
+    "proxy_agency": "#e76f51",
+    "collective_agency": "#264653",
+}
+
+pd.DataFrame(
+    {
+        "measure": [
+            "n_conversations",
+            "mean_personal_agency",
+            "mean_proxy_agency",
+            "mean_collective_agency",
+            "mean_average_agency_score",
+        ],
+        "value": [
+            int(report_df["conversation_id"].nunique()),
+            float(report_df["personal_agency"].mean()),
+            float(report_df["proxy_agency"].mean()),
+            float(report_df["collective_agency"].mean()),
+            float(report_df["average_agency_score"].mean()),
+        ],
+    }
+)
+```
+
+## 2) Distribution Of Agency Scores By Type (Conversation-Level)
+
+This histogram overlays the three score distributions (personal, proxy, collective), with one dashed vertical line per type marking that type's mean score.
+
+Interpretation guide:
+
+- Curves farther right indicate higher scores.
+- Wider spread means more variation across conversations.
+- Mean lines make it easy to compare central tendency across agency types.
+
+```{python}
+long_scores = report_df.melt(
+    id_vars=["conversation_id"],
+    value_vars=agency_attributes,
+    var_name="agency_type",
+    value_name="score",
+).dropna()
+
+mean_by_type = long_scores.groupby("agency_type")["score"].mean().to_dict()
+
+fig, ax = plt.subplots(figsize=(10, 5))
+for agency_type in agency_attributes:
+    subset = long_scores[long_scores["agency_type"] == agency_type]
+    sns.histplot(
+        data=subset,
+        x="score",
+        bins=30,
+        stat="density",
+        element="step",
+        fill=True,
+        alpha=0.22,
+        color=palette[agency_type],
+        label=agency_type,
+        ax=ax,
+    )
+    ax.axvline(
+        mean_by_type[agency_type],
+        color=palette[agency_type],
+        linestyle="--",
+        linewidth=2,
+    )
+
+ax.set_xlim(0, 100)
+ax.set_xlabel("Agency score (0-100)")
+ax.set_ylabel("Density")
+ax.set_title("Conversation-level agency score distributions by type")
+ax.legend(title="Agency type")
+plt.tight_layout()
+fig.savefig(fig_dir / "gabriel_agency_hist_with_means.png", dpi=180)
+plt.show()
+```
+
+Summary statistics for each distribution:
+
+```{python}
+distribution_summary = (
+    long_scores.groupby("agency_type")["score"]
+    .agg(
+        n="count",
+        mean="mean",
+        median="median",
+        std="std",
+        min="min",
+        q25=lambda s: s.quantile(0.25),
+        q75=lambda s: s.quantile(0.75),
+        max="max",
+    )
+    .reset_index()
+    .round(2)
+)
+distribution_summary
+```
+
+## 3) Pairwise Agency Scatter Plots (Conversation-Level)
+
+Each point is one conversation. The three side-by-side plots show all pairwise comparisons of agency types:
+
+- Personal vs Proxy
+- Personal vs Collective
+- Proxy vs Collective
+
+Interpretation guide:
+
+- Points near the upper-right have high values on both dimensions.
+- Points near the diagonal indicate similar levels for the two dimensions.
+- Strong slope patterns suggest the two dimensions rise or fall together.
+- Red fitted line: linear best fit for the two variables.
+- `r` shown on each panel: Pearson correlation (ranges from -1 to +1).
+
+```{python}
+pairs = [
+    ("personal_agency", "proxy_agency"),
+    ("personal_agency", "collective_agency"),
+    ("proxy_agency", "collective_agency"),
+]
+
+fig, axes = plt.subplots(1, 3, figsize=(18, 5), sharex=False, sharey=False)
+
+for ax, (x_col, y_col) in zip(axes, pairs):
+    subset = report_df[[x_col, y_col]].dropna()
+    sns.scatterplot(
+        data=subset,
+        x=x_col,
+        y=y_col,
+        alpha=0.5,
+        s=24,
+        color="#3f6cb5",
+        ax=ax,
+    )
+    sns.regplot(
+        data=subset,
+        x=x_col,
+        y=y_col,
+        scatter=False,
+        ci=None,
+        line_kws={"color": "#d62828", "linewidth": 2},
+        ax=ax,
+    )
+    corr_val = subset[x_col].corr(subset[y_col])
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 100)
+    ax.set_xlabel(x_col)
+    ax.set_ylabel(y_col)
+    ax.set_title(f"{x_col} vs {y_col}")
+    ax.text(
+        0.03,
+        0.96,
+        f"r = {corr_val:.2f}",
+        transform=ax.transAxes,
+        va="top",
+        ha="left",
+        fontsize=10,
+        bbox={"facecolor": "white", "alpha": 0.75, "edgecolor": "#cccccc"},
+    )
+
+plt.tight_layout()
+fig.savefig(fig_dir / "gabriel_pairwise_scatter_triptych.png", dpi=180)
+plt.show()
+```
+
+## 4) LangExtract Redacted Evidence Examples With Gabriel Scores
+
+This table uses the exact same example-selection logic as the `Redacted evidence examples` section in:
+`docs/langextract/agency_signals_report.qmd`.
+
+Selection logic (unchanged):
+
+- sort by `is_candidate` (descending), then
+- `n_heuristic_extractions` (descending), then
+- `snippet_char_len` (descending), then
+- take the first 12 rows.
+
+The selected rows are then joined with Gabriel conversation-level scores.
+
+```{python}
+if snippets.empty:
+    display_df = pd.DataFrame({"note": ["No snippet file found at expected path."]})
+else:
+    # Exact same selection used in docs/langextract/agency_signals_report.qmd
+    langextract_examples = (
+        snippets.sort_values(
+            ["is_candidate", "n_heuristic_extractions", "snippet_char_len"],
+            ascending=[False, False, False],
+        )
+        .head(12)
+        .copy()
+    )
+    langextract_examples["snippet_redacted"] = (
+        langextract_examples["snippet_redacted"].fillna("").astype(str).str.slice(0, 220) + "..."
+    )
+    langextract_examples = langextract_examples.rename(
+        columns={"is_candidate": "is_candidate_langextract"}
+    )
+
+    gabriel_cols = [
+        "conversation_id",
+        "average_agency_score",
+        "personal_agency",
+        "proxy_agency",
+        "collective_agency",
+        "proxy_minus_personal",
+        "n_user_messages",
+        "n_user_chars",
+        "is_candidate",
+    ]
+    gabriel_scores = (
+        report_df[[c for c in gabriel_cols if c in report_df.columns]]
+        .drop_duplicates(subset=["conversation_id"])
+        .rename(columns={"is_candidate": "is_candidate_gabriel"})
+    )
+
+    display_df = langextract_examples.merge(
+        gabriel_scores,
+        on="conversation_id",
+        how="left",
+        sort=False,
+    )
+
+    # Keep only rows that have Gabriel score coverage.
+    if "average_agency_score" in display_df.columns:
+        display_df = display_df[display_df["average_agency_score"].notna()].copy()
+
+    score_cols = [
+        "average_agency_score",
+        "personal_agency",
+        "proxy_agency",
+        "collective_agency",
+        "proxy_minus_personal",
+    ]
+    for col in score_cols:
+        if col in display_df.columns:
+            display_df[col] = display_df[col].round(2)
+
+    ordered_cols = [
+        "conversation_title",
+        "snippet_redacted",
+        "average_agency_score",
+        "personal_agency",
+        "proxy_agency",
+        "collective_agency",
+        "proxy_minus_personal",
+        "n_user_messages",
+        "n_user_chars",
+        "heuristic_constructs",
+        "n_heuristic_extractions",
+        "is_candidate_langextract",
+        "is_candidate_gabriel",
+    ]
+    display_df = display_df[[c for c in ordered_cols if c in display_df.columns]]
+
+display_df
+```

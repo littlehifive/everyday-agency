@@ -13,75 +13,87 @@ DEFAULT_MIN_SNIPPET_CHARS = 300
 MAX_SNIPPET_CHARS = 700
 
 TITLE_KEYWORD_GROUPS = {
-    "goal_and_planning": [
+    "personal_agency": [
         "goal",
         "objective",
-        "target",
         "plan",
-        "planning",
         "strategy",
         "roadmap",
         "timeline",
         "milestone",
-    ],
-    "workflow_and_execution": [
-        "workflow",
-        "process",
-        "steps",
-        "checklist",
-        "task",
-        "project",
+        "execute",
         "implementation",
-        "build",
-        "deploy",
+        "ownership",
+        "self-directed",
+        "self-management",
+        "action plan",
     ],
-    "problem_solving": [
-        "problem",
-        "issue",
-        "error",
-        "bug",
-        "fix",
-        "troubleshoot",
-        "debug",
-        "resolve",
-        "solution",
-    ],
-    "decision_and_comparison": [
-        "decide",
-        "decision",
-        "choose",
-        "option",
-        "comparison",
-        "tradeoff",
+    "proxy_agency": [
+        "assistant",
+        "advisor",
+        "coach",
+        "agent",
+        "chatbot",
+        "ai",
+        "ai assistant",
+        "copilot",
         "recommendation",
-        "evaluate",
-        "review",
+        "guidance",
+        "delegate",
+        "automate",
+        "decide for me",
+        "tell me what to do",
+    ],
+    "collective_agency": [
+        "team",
+        "together",
+        "collaborate",
+        "coordination",
+        "co-worker",
+        "shared",
+        "cross-functional",
+        "stakeholder",
+        "joint",
+        "handoff",
+        "align",
     ],
 }
 
 TEXT_CUE_PATTERNS = {
-    "goal_intent": re.compile(
-        r"\b(i need to|i want to|my goal is|objective is|aim to|trying to)\b",
+    "personal_intent_control": re.compile(
+        r"\b(i (will|can|plan to|intend to|am going to)|my plan is|i'll)\b",
         flags=re.IGNORECASE,
     ),
-    "planning_language": re.compile(
-        r"\b(plan|steps?|roadmap|timeline|strategy|prioritize|sequence)\b",
+    "personal_ownership_responsibility": re.compile(
+        r"\b(i (take|own|accept) responsibility|my responsibility|on my own|i(?:'ll| will) handle)\b",
         flags=re.IGNORECASE,
     ),
-    "decision_process": re.compile(
-        r"\b(option|trade[- ]?off|decide|decision|choose between|pros and cons)\b",
+    "personal_self_efficacy": re.compile(
+        r"\b(i(?:'m| am) confident|i can handle|i can do this|i know how to)\b",
         flags=re.IGNORECASE,
     ),
-    "obstacle_signal": re.compile(
-        r"\b(stuck|blocked|problem|issue|error|difficulty|challenge|constraint)\b",
+    "proxy_advice_seeking": re.compile(
+        r"\b(can you|could you|please (recommend|advise|choose|decide)|what do you recommend|tell me what to do)\b",
         flags=re.IGNORECASE,
     ),
-    "monitoring_signal": re.compile(
-        r"\b(progress|track|milestone|status|measure|benchmark)\b",
+    "proxy_delegation": re.compile(
+        r"\b(decide for me|you choose|you decide|delegate (this|it)|hand this off|automate this for me)\b",
         flags=re.IGNORECASE,
     ),
-    "persistence_signal": re.compile(
-        r"\b(try again|retry|keep going|despite|still|even though|adapt|iterate|persevere)\b",
+    "proxy_trust_dependence": re.compile(
+        r"\b(i (trust|rely on|depend on) (you|the assistant|this chatbot|the ai)|follow your advice)\b",
+        flags=re.IGNORECASE,
+    ),
+    "collective_team_coordination": re.compile(
+        r"\b(our team|as a team|work together|collaborat(e|ion)|coordinate with|sync with|align with)\b",
+        flags=re.IGNORECASE,
+    ),
+    "collective_role_split": re.compile(
+        r"\b(while you|while the team|loop in|handoff to|hand off to|escalate to)\b",
+        flags=re.IGNORECASE,
+    ),
+    "collective_shared_efficacy": re.compile(
+        r"\b(shared goal|joint effort|jointly|cross-functional|co-own|coordinated effort)\b",
         flags=re.IGNORECASE,
     ),
 }
@@ -100,26 +112,28 @@ LONG_ID_PATTERN = re.compile(
 SENTENCE_BREAKS = [". ", "? ", "! ", "; "]
 
 AGENCY_ATTRIBUTES = [
-    "goal_specificity",
-    "goal_commitment",
-    "planning_specificity",
-    "problem_decomposition",
-    "sequencing_prioritization",
-    "progress_monitoring_orientation",
-    "obstacle_diagnosis_quality",
-    "adaptation_strategy_quality",
-    "help_seeking_effectiveness",
-    "resource_tool_leverage",
-    "execution_readiness",
-    "self_efficacy_signal",
-    "persistence_recovery",
-    "reflective_learning_orientation",
-    "agency_abdication",
-    "fatalism_helplessness",
+    "personal_agency",
+    "proxy_agency",
+    "collective_agency",
 ]
 
-POSITIVE_ATTRIBUTES = AGENCY_ATTRIBUTES[:14]
-NEGATIVE_ATTRIBUTES = AGENCY_ATTRIBUTES[14:]
+AGENCY_ATTRIBUTE_DEFINITIONS = {
+    "personal_agency": (
+        "Personal (self) agency: the user's own capability and perceived control to pursue "
+        "their goals through their own actions. Score higher when the text shows clear "
+        "ownership, ability, and intentional action to produce outcomes."
+    ),
+    "proxy_agency": (
+        "Proxy agency: reliance on another agent's capability (for example, an AI assistant) "
+        "to help the user achieve goals when the user lacks enough capability or control alone. "
+        "Score higher when the user expresses trust in the proxy and transfer of decision/action control."
+    ),
+    "collective_agency": (
+        "Collective agency: coordinated capability and control across a team of actors "
+        "(user + AI + human collaborators) working together toward a shared service goal. "
+        "Score higher when the text reflects teamwork, coordination, and shared efficacy."
+    ),
+}
 
 
 def add_common_args(

@@ -2,6 +2,11 @@
 
 This pipeline is fully isolated from `analysis/langextract`.
 
+Rubric scope:
+- `personal_agency`
+- `proxy_agency`
+- `collective_agency`
+
 ## Outputs
 All generated outputs are written under:
 

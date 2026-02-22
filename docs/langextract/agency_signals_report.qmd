@@ -30,9 +30,13 @@ import matplotlib.pyplot as plt
 
 sns.set_theme(style="whitegrid")
 
-cwd = Path.cwd()
-docs_dir = cwd if cwd.name == "docs" else (cwd / "docs")
-root = docs_dir.parent
+def find_repo_root(start: Path) -> Path:
+    for candidate in [start, *start.parents]:
+        if (candidate / "data" / "derived").exists():
+            return candidate
+    raise RuntimeError("Could not locate repository root containing data/derived")
+
+root = find_repo_root(Path.cwd().resolve())
 data_dir = root / "data" / "derived" / "langextract"
 fig_dir = data_dir / "figures"
 fig_dir.mkdir(parents=True, exist_ok=True)

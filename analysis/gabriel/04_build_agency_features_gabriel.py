@@ -8,8 +8,6 @@ import polars as pl
 
 from gabriel_common import (
     AGENCY_ATTRIBUTES,
-    NEGATIVE_ATTRIBUTES,
-    POSITIVE_ATTRIBUTES,
     add_common_args,
     ensure_parent_dir,
 )
@@ -80,10 +78,12 @@ def main() -> None:
     feature_pd = feature_pd.merge(
         metadata_pd, on="conversation_id", how="left", suffixes=("", "_meta")
     )
-    feature_pd["agency_positive_mean"] = feature_pd[POSITIVE_ATTRIBUTES].mean(axis=1)
-    feature_pd["agency_negative_mean"] = feature_pd[NEGATIVE_ATTRIBUTES].mean(axis=1)
-    feature_pd["agency_index_raw"] = (
-        feature_pd["agency_positive_mean"] - 0.7 * feature_pd["agency_negative_mean"]
+    feature_pd["agency_index_raw"] = feature_pd[AGENCY_ATTRIBUTES].mean(axis=1)
+    feature_pd["agency_spread"] = (
+        feature_pd[AGENCY_ATTRIBUTES].max(axis=1) - feature_pd[AGENCY_ATTRIBUTES].min(axis=1)
+    )
+    feature_pd["proxy_minus_personal"] = (
+        feature_pd["proxy_agency"] - feature_pd["personal_agency"]
     )
 
     mean_raw = float(feature_pd["agency_index_raw"].mean())
@@ -96,7 +96,7 @@ def main() -> None:
     feature_pd["agency_high_flag"] = (feature_pd["agency_index_z"] >= 1.0).astype(int)
     feature_pd["agency_low_flag"] = (feature_pd["agency_index_z"] <= -1.0).astype(int)
     feature_pd = feature_pd.sort_values(
-        ["agency_index_raw", "agency_positive_mean"], ascending=[False, False]
+        ["agency_index_raw", "personal_agency"], ascending=[False, False]
     )
 
     if not feature_pd["conversation_id"].is_unique:

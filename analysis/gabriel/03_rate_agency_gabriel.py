@@ -80,7 +80,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--n-attributes-per-run",
         type=int,
-        default=8,
+        default=3,
         help="Attributes per prompt batch in gabriel.rate.",
     )
     parser.add_argument(
@@ -133,7 +133,14 @@ def load_attributes(attributes_path: Path) -> dict[str, str]:
     missing_expected = [name for name in AGENCY_ATTRIBUTES if name not in attrs]
     if missing_expected:
         raise ValueError(f"Missing expected agency attributes: {missing_expected}")
-    return {str(k): str(v) for k, v in attrs.items()}
+    unexpected = [name for name in attrs if name not in AGENCY_ATTRIBUTES]
+    if unexpected:
+        raise ValueError(
+            "Attributes file contains unsupported attributes for this rubric: "
+            f"{sorted(unexpected)}"
+        )
+    # Preserve canonical rubric order to keep outputs stable run-to-run.
+    return {name: str(attrs[name]) for name in AGENCY_ATTRIBUTES}
 
 
 def build_chunk_dataframe(
