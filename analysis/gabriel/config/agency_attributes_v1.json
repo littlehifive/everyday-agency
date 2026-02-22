@@ -1,0 +1,20 @@
+{
+  "attributes": {
+    "goal_specificity": "How clearly and specifically the user states a concrete goal or desired outcome (0 = no clear goal, 100 = highly specific objective with clear target).",
+    "goal_commitment": "How strongly the user expresses ownership and commitment to pursuing the goal (0 = detached or wishful, 100 = explicit commitment to act).",
+    "planning_specificity": "How detailed and operational the user plan is (0 = no plan, 100 = detailed practical plan with concrete actions).",
+    "problem_decomposition": "How much the user breaks a large problem into manageable subproblems (0 = no decomposition, 100 = clear and effective decomposition).",
+    "sequencing_prioritization": "How clearly the user sequences steps and prioritizes what to do first (0 = no ordering, 100 = strong ordering and priority logic).",
+    "progress_monitoring_orientation": "How much the user specifies tracking progress, checkpoints, feedback loops, or evaluation criteria (0 = no monitoring orientation, 100 = explicit measurement and checkpoints).",
+    "obstacle_diagnosis_quality": "How clearly and accurately the user identifies blockers, constraints, or failure causes (0 = vague/no diagnosis, 100 = precise and actionable diagnosis).",
+    "adaptation_strategy_quality": "How well the user proposes fallback plans, iteration, or strategy updates when conditions change (0 = rigid/no adaptation, 100 = high-quality adaptive strategy).",
+    "help_seeking_effectiveness": "How targeted and action-relevant the user's help requests are (0 = broad/unclear requests, 100 = focused requests likely to unblock progress).",
+    "resource_tool_leverage": "How effectively the user leverages tools, references, examples, or external resources to execute (0 = no leverage, 100 = strong purposeful leverage).",
+    "execution_readiness": "How ready the user appears to execute immediately after this turn (0 = not actionable, 100 = highly actionable and ready to implement now).",
+    "self_efficacy_signal": "How much the user expresses confidence in their ability to perform or learn the task (0 = no self-efficacy, 100 = strong confidence in capability).",
+    "persistence_recovery": "How much the user demonstrates persistence after setbacks and willingness to continue iterating (0 = gives up, 100 = clear resilient persistence).",
+    "reflective_learning_orientation": "How much the user reflects on prior attempts and updates approach based on lessons learned (0 = no reflection, 100 = strong reflective learning behavior).",
+    "agency_abdication": "How much the user offloads core decision making or action responsibility entirely to the assistant/system (0 = no abdication, 100 = complete abdication).",
+    "fatalism_helplessness": "How much the user expresses helplessness, fatalism, or inability to affect outcomes (0 = no helplessness, 100 = strong helpless/fatalistic framing)."
+  }
+}

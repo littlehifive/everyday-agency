@@ -1,0 +1,35 @@
+{% import "snippets.jinja2" as snip %}
+{{ snip.single_entry(modality, text) }}
+
+Task: rate the following agency attributes from 0 to 100 using direct textual evidence.
+
+BEGIN ATTRIBUTES
+{{ attributes | shuffled_dict }}
+END ATTRIBUTES
+
+Scale guidance:
+- 0 = absent
+- 50 = moderate
+- 100 = extreme, clear, and rare
+- use integer scores only
+
+Critical constraints:
+- Evaluate each attribute independently.
+- No cross-attribute inference.
+- No indirect inference from topic, author identity, or metadata.
+- Use direct evidence present in the provided content only.
+
+Output JSON only:
+{
+  "<attribute>": <integer 0-100>,
+  "<attribute>": <integer 0-100>
+}
+
+Use these attribute names exactly as provided: {{ attributes.keys() | shuffled }}
+Do not omit any attribute.
+
+{% if additional_instructions %}
+BEGIN ADDITIONAL INSTRUCTIONS
+{{ additional_instructions }}
+END ADDITIONAL INSTRUCTIONS
+{% endif %}
