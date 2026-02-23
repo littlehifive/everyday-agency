@@ -1,5 +1,7 @@
 # Measuring Agency in My ChatGPT Conversations
 
+**Zezhen Wu | The Agency Fund**
+
 This project analyzes everyday signals of human agency in human-AI interactions using snippets from my exported ChatGPT conversations.
 
 To try it on your own, make a privacy request to download your ChatGPT history via [OpenAI's privacy portal](https://privacy.openai.com/policies/en/). You will receive an email from OpenAI with a link to download your full chat history. In the download zip file, you will see a large HTML file named `chat.html`, which contains all text data.
