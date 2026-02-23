@@ -138,6 +138,37 @@ fig.savefig(fig_dir / "construct_cooccurrence_heatmap.png", dpi=180)
 plt.show()
 ```
 
+### Time trend: monthly average conversation volume
+
+```{python}
+conversation_trend = (
+    features.dropna(subset=["first_user_time"])
+    .assign(month=lambda d: d["first_user_time"].dt.to_period("M").dt.to_timestamp())
+    .groupby("month", as_index=False)
+    .agg(conversations=("conversation_id", "nunique"))
+    .sort_values("month")
+)
+conversation_trend["avg_conversations_per_day"] = (
+    conversation_trend["conversations"] / conversation_trend["month"].dt.days_in_month
+)
+
+fig, ax = plt.subplots(figsize=(11, 5))
+sns.lineplot(
+    data=conversation_trend,
+    x="month",
+    y="avg_conversations_per_day",
+    marker="o",
+    color="#355c7d",
+    ax=ax,
+)
+ax.set_xlabel("Month")
+ax.set_ylabel("Average conversations per day")
+ax.set_title("Monthly average conversation volume")
+plt.tight_layout()
+fig.savefig(fig_dir / "monthly_conversation_volume_trend.png", dpi=180)
+plt.show()
+```
+
 ### Time trend: monthly average agency counts
 
 ```{python}
